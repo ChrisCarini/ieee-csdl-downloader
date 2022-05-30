@@ -1,0 +1,52 @@
+# (Required) The cookie used for authentication
+CSDL_AUTH_COOKIE: 'abcd1234'
+
+# (Required) Where the downloads will go.
+DOWNLOAD_DIR: ./downloads
+
+# (Required) The publications to download
+PUBLICATIONS:
+  #  # URL: https://www.computer.org/csdl/magazine/cd
+  #  - name: IEEE Cloud Computing
+  #    url_indicator: cd
+  #    start_year: 2014
+  #    end_year: 2018
+  #    type: mags
+  #
+  #  # URL: https://www.computer.org/csdl/magazine/pd
+  #  - name: IEEE Concurrency
+  #    url_indicator: pd
+  #    start_year: 1993
+  #    end_year: 2000
+  #    type: mags
+  #
+  #  # URL: https://www.computer.org/csdl/magazine/dt
+  #  - name: IEEE Design & Test of Computers
+  #    url_indicator: dt
+  #    start_year: 1984
+  #    end_year: 2014
+  #    type: mags
+  #
+  #  # URL:
+  #  - name: https://www.computer.org/csdl/magazine/ds
+  #    url_indicator: ds
+  #    start_year: 2000
+  #    end_year: 2008
+  #    type: mags
+
+  # URL: https://www.computer.org/csdl/magazine/sp
+  - name: IEEE Security & Privacy
+    url_indicator: sp
+    start_year: 2003
+    end_year: null
+    type: mags
+
+  # URL: https://www.computer.org/csdl/journal/bd
+  - name: IEEE Transactions on Big Data
+    url_indicator: bd
+    start_year: 2015
+    end_year: null
+    type: trans
+
+# (Optional) Where the downloads will go.
+DEBUG: False

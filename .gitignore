@@ -2,7 +2,7 @@
 venv/
 
 # ieee-csdl-downloader config file
-config.ini
+config.yaml
 
 # ieee-csdl-downloader data directory
 downloads/

@@ -1,10 +1,18 @@
 from datetime import date
 from pathlib import Path
 
+from ieee_csdl_downloader.config import get_config
 from ieee_csdl_downloader.publications import Publication
 
-DEBUG = False
+DEBUG = get_config().get('DEBUG', False)
 TODAY = date.today()
+
+PUBLICATIONS = Publication.from_config()
+
+YEARS = [2022] if DEBUG else []
+ISSUES = [1, 2, 3, 4, 5, 6]
+
+DOWNLOAD_DIR = Path(get_config().get('DOWNLOAD_DIR'))
 
 GRAPH_QL_QUERY = (
     """query ($idPrefix: String!, $year: String!, $issueNum: String!, $cfpCategoryId: String!, $announcementsCategoryId: String!, $limitResults: Int, $skipResults: Int) {   # noqa: E501
@@ -112,21 +120,3 @@ GRAPH_QL_QUERY = (
 """
     ''
 )
-
-PUBLICATIONS = [
-    # Publication(name='IEEE Cloud Computing', type='mags', url_indicator='cd', start_year=2014, end_year=2018),
-    # Publication(name='IEEE Concurrency', type='mags', url_indicator='cd', start_year=1993, end_year=2000),
-    # Publication(name='IEEE Design & Test of Computers', type='mags', url_indicator='dt', start_year=1984, end_year=2014),
-    # Publication(name='IEEE Distributed Systems Online', type='mags', url_indicator='dt', start_year=2000, end_year=2008),
-    Publication(name='IEEE Security & Privacy', type='mags', url_indicator='sp', start_year=2003, end_year=None),
-    Publication(name='IEEE Transactions on Big Data', type='trans', url_indicator='bd', start_year=2015, end_year=None),
-]
-
-if DEBUG:  # pragma: nocover
-    DOWNLOAD_DIR = Path('./downloads_debug')
-    YEARS = [2022]
-    ISSUES = [1, 2, 3, 4, 5, 6]
-else:
-    DOWNLOAD_DIR = Path('./downloads')
-    YEARS = []
-    ISSUES = [1, 2, 3, 4, 5, 6]
