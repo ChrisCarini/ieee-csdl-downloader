@@ -157,5 +157,6 @@ def build_download_url(pub, year, issue, filetype):
     return url
 
 
+# RUN VIA: `source activate && python3 -m ieee_csdl_downloader.download && deactivate`
 if __name__ == '__main__':  # pragma: nocover
     main()
