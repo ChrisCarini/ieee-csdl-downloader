@@ -7,7 +7,7 @@ from typing import List
 import requests
 
 from ieee_csdl_downloader.auth import COOKIES
-from ieee_csdl_downloader.constants import DOWNLOAD_DIR, GRAPH_QL_QUERY, ISSUES, PUBLICATIONS, TODAY, YEARS
+from ieee_csdl_downloader.constants import DOWNLOAD_DIR, GRAPH_QL_QUERY, PUBLICATIONS, TODAY, YEARS
 from ieee_csdl_downloader.data import get_pub_formats, get_pub_month
 from ieee_csdl_downloader.pdf import unzip_and_merge
 from ieee_csdl_downloader.publications import Publication
@@ -75,7 +75,7 @@ def main() -> None:  # pragma: nocover
 
         # Iterate over all the desired years & issues to get the media.
         for year in YEARS or range(pub.start_year, (pub.end_year if pub.end_year else TODAY.year) + 1):
-            for issue in ISSUES:
+            for issue in pub.issues:
                 json_data = get_publication_graphql(year=year, issue=issue, publication=pub)
                 pub_month = get_pub_month(json_data=json_data)
                 pub_formats = get_pub_formats(json_data=json_data)

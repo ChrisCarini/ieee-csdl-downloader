@@ -34,6 +34,14 @@ PUBLICATIONS:
   #    end_year: 2008
   #    type: mags
 
+  # URL: https://www.computer.org/csdl/magazine/co
+  - name: Computer
+    url_indicator: co
+    start_year: 2000
+    end_year: null
+    issues: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+    type: mags
+
   # URL: https://www.computer.org/csdl/magazine/sp
   - name: IEEE Security & Privacy
     url_indicator: sp

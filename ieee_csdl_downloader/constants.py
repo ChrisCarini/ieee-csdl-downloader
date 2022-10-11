@@ -10,7 +10,6 @@ TODAY = date.today()
 PUBLICATIONS = Publication.from_config()
 
 YEARS = [2022] if DEBUG else []
-ISSUES = [1, 2, 3, 4, 5, 6]
 
 DOWNLOAD_DIR = Path(get_config().get('DOWNLOAD_DIR'))
 
