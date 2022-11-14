@@ -1,6 +1,6 @@
 blue==0.9.1
 isort==5.10.1
-mypy==0.982
+mypy==0.990
 pikepdf==6.2.4
 pip-chill==1.0.1
 pypdf2==2.11.1
