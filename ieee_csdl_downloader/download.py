@@ -2,7 +2,7 @@ import shutil
 
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import requests
 
@@ -15,7 +15,7 @@ from ieee_csdl_downloader.publications import Publication
 DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def download_file(download_url: str, download_path: Path = None) -> None:  # pragma: nocover
+def download_file(download_url: str, download_path: Optional[Path] = None) -> None:  # pragma: nocover
     if not download_path:
         download_path = Path(DOWNLOAD_DIR / download_url.split('/')[-1].split('?')[0])
 
