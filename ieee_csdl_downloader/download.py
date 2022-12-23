@@ -7,7 +7,7 @@ from typing import List, Optional
 import requests
 
 from ieee_csdl_downloader.auth import COOKIES
-from ieee_csdl_downloader.constants import DOWNLOAD_DIR, GRAPH_QL_QUERY, PUBLICATIONS, TODAY, YEARS
+from ieee_csdl_downloader.constants import DOWNLOAD_DIR, DOWNLOAD_START_YEAR, GRAPH_QL_QUERY, PUBLICATIONS, TODAY, YEARS
 from ieee_csdl_downloader.data import get_pub_formats, get_pub_month
 from ieee_csdl_downloader.pdf import unzip_and_merge
 from ieee_csdl_downloader.publications import Publication
@@ -75,6 +75,11 @@ def main() -> None:  # pragma: nocover
 
         # Iterate over all the desired years & issues to get the media.
         for year in YEARS or range(pub.start_year, (pub.end_year if pub.end_year else TODAY.year) + 1):
+
+            if DOWNLOAD_START_YEAR and year < DOWNLOAD_START_YEAR:
+                print(f'[{datetime.now().isoformat()}] Skipping {year} for {pub.name}; config says last download was {DOWNLOAD_START_YEAR}')
+                continue
+
             for issue in pub.issues:
                 json_data = get_publication_graphql(year=year, issue=issue, publication=pub)
                 pub_month = get_pub_month(json_data=json_data)
@@ -95,8 +100,7 @@ def main() -> None:  # pragma: nocover
 
                 # Download each of the desired files.
                 for filetype in pub_formats:
-                    timestamp = datetime.now().isoformat()
-                    print(f'[{timestamp}] Downloading [{pub.name}] issue ' f'for {year}-{month} (Issue {issue} - {filetype:4})...', end='')
+                    print(f'[{datetime.now().isoformat()}] Downloading [{pub.name}] issue ' f'for {year}-{month} (Issue {issue} - {filetype:4})...', end='')
                     url = build_download_url(pub, year, issue, filetype)
 
                     local_file = file_fn(file_type=filetype)

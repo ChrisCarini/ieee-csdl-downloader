@@ -1,6 +1,10 @@
 # (Required) The cookie used for authentication
 CSDL_AUTH_COOKIE: 'abcd1234'
 
+# (Optional) The first year to start downloading. This variable will assume that
+#            any publications' issues prior to this year were already downloaded.
+DOWNLOAD_START_YEAR: 2022
+
 # (Required) Where the downloads will go.
 DOWNLOAD_DIR: ./downloads
 
