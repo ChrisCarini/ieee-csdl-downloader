@@ -8,13 +8,13 @@ from typing import List
 
 import pikepdf
 
-from ieee_csdl_downloader.constants import DOWNLOAD_DIR
+from ieee_csdl_downloader.config import get_download_dir
 
 
 def unzip_and_merge(output_pdf_file: Path, zip_file: Path):  # pragma: nocover
     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
         # create temp dir
-        with tempfile.TemporaryDirectory(dir=DOWNLOAD_DIR) as temp_dirpath:
+        with tempfile.TemporaryDirectory(dir=get_download_dir()) as temp_dirpath:
             # extract files
             zip_ref.extractall(temp_dirpath)
 

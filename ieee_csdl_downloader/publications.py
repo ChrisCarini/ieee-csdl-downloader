@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from ieee_csdl_downloader.config import get_config
+from ieee_csdl_downloader.config import get_publications
 
 
 @dataclass
@@ -16,7 +16,7 @@ class Publication:
     @classmethod
     def from_config(cls) -> List['Publication']:
         result: List[Publication] = []
-        for publication in get_config().get('PUBLICATIONS'):
+        for publication in get_publications():
             result.append(
                 Publication(
                     name=publication.get('name'),

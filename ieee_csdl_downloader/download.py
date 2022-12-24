@@ -1,3 +1,4 @@
+import functools
 import shutil
 
 from datetime import datetime
@@ -6,26 +7,33 @@ from typing import List, Optional
 
 import requests
 
-from ieee_csdl_downloader.auth import COOKIES
-from ieee_csdl_downloader.constants import DOWNLOAD_DIR, DOWNLOAD_START_YEAR, GRAPH_QL_QUERY, PUBLICATIONS, TODAY, YEARS
+from ieee_csdl_downloader.config import debug_mode, get_download_dir, get_download_start_year, get_ieee_csdl_cookies, get_ieee_spectrum_cookies
+from ieee_csdl_downloader.constants import GRAPH_QL_QUERY, TODAY
 from ieee_csdl_downloader.data import get_pub_formats, get_pub_month
 from ieee_csdl_downloader.pdf import unzip_and_merge
 from ieee_csdl_downloader.publications import Publication
 
-DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-
-def download_file(download_url: str, download_path: Optional[Path] = None) -> None:  # pragma: nocover
+def download_file(
+    download_url: str,
+    download_path: Optional[Path] = None,
+    cookies: Optional[dict] = None,
+) -> None:  # pragma: nocover
     if not download_path:
-        download_path = Path(DOWNLOAD_DIR / download_url.split('/')[-1].split('?')[0])
+        download_path = Path(get_download_dir() / download_url.split('/')[-1].split('?')[0])
 
-    with requests.get(download_url, stream=True) as r:
+    with requests.get(download_url, stream=True, cookies=cookies) as r:
         with open(download_path, 'wb') as f:
+            # See the below links:
+            #   - https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests#comment95588469_39217788
+            #   - https://github.com/psf/requests/issues/2155#issuecomment-50771010
+            r.raw.read = functools.partial(r.raw.read, decode_content=True)
+
             shutil.copyfileobj(r.raw, f)
 
 
 def get_publication_directory(pub_name: str):
-    return Path(DOWNLOAD_DIR / pub_name)
+    return Path(get_download_dir() / pub_name)
 
 
 def get_local_filename(
@@ -59,25 +67,28 @@ def get_publication_graphql(year: int, issue: int, publication: Publication) -> 
             'query': GRAPH_QL_QUERY,
         },
         allow_redirects=True,
-        cookies=COOKIES,
+        cookies=get_ieee_csdl_cookies(),
     )
     json_data = r.json()
     return json_data
 
 
-def main() -> None:  # pragma: nocover
+def download_publications_from_ieee_csdl() -> None:  # pragma: nocover
+    get_download_dir().mkdir(parents=True, exist_ok=True)
+
     download_problems: List[str] = []
 
-    for pub in PUBLICATIONS:
+    for pub in Publication.from_config():
 
         # Create the directory for this publication
         get_publication_directory(pub_name=pub.name).mkdir(exist_ok=True)
 
+        years = [2022] if debug_mode() else range(pub.start_year, (pub.end_year if pub.end_year else TODAY.year) + 1)
         # Iterate over all the desired years & issues to get the media.
-        for year in YEARS or range(pub.start_year, (pub.end_year if pub.end_year else TODAY.year) + 1):
+        for year in years:
 
-            if DOWNLOAD_START_YEAR and year < DOWNLOAD_START_YEAR:
-                print(f'[{datetime.now().isoformat()}] Skipping {year} for {pub.name}; config says last download was {DOWNLOAD_START_YEAR}')
+            if get_download_start_year() and year < get_download_start_year():
+                print(f'[{datetime.now().isoformat()}] Skipping {year} for {pub.name}; config says last download was {get_download_start_year()}')
                 continue
 
             for issue in pub.issues:
@@ -117,7 +128,7 @@ def main() -> None:  # pragma: nocover
                     r = requests.head(
                         url=url,
                         allow_redirects=True,
-                        cookies=COOKIES,
+                        cookies=get_ieee_csdl_cookies(),
                     )
                     if r.status_code == 403:
                         print('File does not exist; skipping!')
@@ -161,6 +172,51 @@ def build_download_url(pub, year, issue, filetype):
     return url
 
 
+def download_ieee_spectrum():  # pragma: nocover
+    r = requests.get(
+        url='https://spectrum.ieee.org/core/users/settings.js',
+        cookies=get_ieee_spectrum_cookies(),
+    )
+
+    if r.status_code != 200:
+        print('Status Code != 200; skipping downloading IEEE Spectrum!\n')
+        print('[ERROR] Please try updating the value of `IEEE_SPECTRUM_SESSIONID` and re-running the program.')
+        print('Exiting.')
+        exit(1)
+
+    pages = r.json().get('parent_site', {}).get('pages', [])
+    filtered_pages = filter(
+        lambda page: (
+            page.get('about_html').endswith('.pdf')
+            and '/files/' in page.get('about_html')
+            and (page.get('isPublic', False) is True or page.get('isUnlisted', False) is True)
+        ),
+        pages,
+    )
+    sorted_filtered_pages = list((sorted(filtered_pages, key=lambda d: datetime.strptime(d['title'], '%B %Y'))))
+    for page in sorted_filtered_pages:
+        about_html = page.get('about_html')
+        download_url = about_html if about_html.startswith('https://') else f'https://spectrum.ieee.org{about_html}'
+
+        title = page['title']
+        file_date = datetime.strptime(title, '%B %Y')
+
+        if get_download_start_year() and file_date.year < get_download_start_year():
+            print(f'[{datetime.now().isoformat()}] Skipping {file_date.year} for IEEE Spectrum; config says last download was {get_download_start_year()}')
+            continue
+
+        filename = f'{file_date.year}-{str(file_date.month).zfill(2)} - IEEE Spectrum - {title}.pdf'
+        download_path = Path(f'{get_download_dir()}/IEEE Spectrum/{filename}').absolute()
+
+        if download_path.exists():
+            print(f'Skipping [{download_path}]; file exists.')
+            continue
+
+        print(f'Downloading [{download_url}] to [{download_path}]')
+        download_file(download_url=download_url, download_path=download_path, cookies=get_ieee_spectrum_cookies())
+
+
 # RUN VIA: `source activate && python3 -m ieee_csdl_downloader.download && deactivate`
 if __name__ == '__main__':  # pragma: nocover
-    main()
+    download_publications_from_ieee_csdl()
+    download_ieee_spectrum()

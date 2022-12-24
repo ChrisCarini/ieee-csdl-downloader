@@ -1,19 +1,6 @@
 from datetime import date
-from pathlib import Path
 
-from ieee_csdl_downloader.config import get_config
-from ieee_csdl_downloader.publications import Publication
-
-DEBUG = get_config().get('DEBUG', False)
 TODAY = date.today()
-
-PUBLICATIONS = Publication.from_config()
-
-YEARS = [2022] if DEBUG else []
-
-DOWNLOAD_START_YEAR = get_config().get('DOWNLOAD_START_YEAR', None)
-
-DOWNLOAD_DIR = Path(get_config().get('DOWNLOAD_DIR'))
 
 GRAPH_QL_QUERY = (
     """query ($idPrefix: String!, $year: String!, $issueNum: String!, $cfpCategoryId: String!, $announcementsCategoryId: String!, $limitResults: Int, $skipResults: Int) {   # noqa: E501
