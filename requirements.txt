@@ -1,7 +1,7 @@
 blue==0.9.1
 isort==5.13.2
 mypy==1.13.0
-pikepdf==9.4.1
+pikepdf==9.4.2
 pip-chill==1.0.3
 pytest-cov==6.0.0
 pyyaml==6.0.2
