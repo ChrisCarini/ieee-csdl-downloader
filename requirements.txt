@@ -6,5 +6,5 @@ pip-chill==1.0.3
 pytest-cov==6.1.1
 pyyaml==6.0.2
 requests==2.32.3
-types-pyyaml==6.0.12.20250402
+types-pyyaml==6.0.12.20250516
 types-requests==2.32.0.20250515
