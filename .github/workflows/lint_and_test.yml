@@ -23,7 +23,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: 3.x
           cache: 'pip'
 
       - name: Install dependencies
@@ -32,17 +32,11 @@ jobs:
       - name: Copy example config
         run: cp config.example.yaml config.yaml
 
-      - name: Lint - isort
-        run: isort ieee_csdl_downloader/ test/
+      - name: Lint - ruff
+        run: ruff check
 
       - name: Lint - mypy
         run: mypy ieee_csdl_downloader/ test/
-
-      - name: Lint - flake8
-        run: flake8 ieee_csdl_downloader/ test/
-
-      - name: Lint - blue
-        run: blue --check ieee_csdl_downloader/ test/
 
       - name: Test
         run: pytest

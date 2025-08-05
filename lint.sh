@@ -2,7 +2,5 @@
 
 source activate
 
-isort ieee_csdl_downloader/ test/
+ruff check
 mypy ieee_csdl_downloader/ test/
-flake8 ieee_csdl_downloader/ test/
-blue ieee_csdl_downloader/ test/

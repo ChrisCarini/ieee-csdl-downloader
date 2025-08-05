@@ -27,7 +27,7 @@ def download_file(
             # See the below links:
             #   - https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests#comment95588469_39217788
             #   - https://github.com/psf/requests/issues/2155#issuecomment-50771010
-            r.raw.read = functools.partial(r.raw.read, decode_content=True)
+            r.raw.read = functools.partial(r.raw.read, decode_content=True)  # type: ignore[method-assign]
 
             shutil.copyfileobj(r.raw, f)
 

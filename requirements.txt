@@ -1,10 +1,9 @@
-blue==0.9.1
-isort==6.0.1
-mypy==1.17.0
+mypy==1.17.1
 pikepdf==9.10.2
 pip-chill==1.0.3
 pytest-cov==6.2.1
 pyyaml==6.0.2
 requests==2.32.4
+ruff==0.12.7
 types-pyyaml==6.0.12.20250516
 types-requests==2.32.4.20250611
