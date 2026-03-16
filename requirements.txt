@@ -1,6 +1,6 @@
 mypy==1.19.1
 pikepdf==10.5.0
-pip-chill==1.0.3
+pip-chill==1.0.5
 pytest-cov==7.0.0
 pyyaml==6.0.3
 requests==2.32.5
