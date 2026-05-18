@@ -6,4 +6,4 @@ pyyaml==6.0.3
 requests==2.34.2
 ruff==0.15.13
 types-pyyaml==6.0.12.20260510
-types-requests==2.33.0.20260513
+types-requests==2.33.0.20260518
