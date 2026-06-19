@@ -1,5 +1,5 @@
 mypy==2.1.0
-pikepdf==10.8.0
+pikepdf==10.9.0
 pip-chill==1.0.5
 pytest-cov==7.1.0
 pyyaml==6.0.3
