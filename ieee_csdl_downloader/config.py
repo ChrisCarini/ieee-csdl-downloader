@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def get_config():  # pragma: nocover
     with open('config.yaml', 'r') as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)

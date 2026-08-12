@@ -1,13 +1,19 @@
 import functools
 import shutil
+import sys
 
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
 
 import requests
 
-from ieee_csdl_downloader.config import debug_mode, get_download_dir, get_download_start_year, get_ieee_csdl_cookies, get_ieee_spectrum_cookies
+from ieee_csdl_downloader.config import (
+    debug_mode,
+    get_download_dir,
+    get_download_start_year,
+    get_ieee_csdl_cookies,
+    get_ieee_spectrum_cookies,
+)
 from ieee_csdl_downloader.constants import GRAPH_QL_QUERY, TODAY
 from ieee_csdl_downloader.data import get_pub_formats, get_pub_month
 from ieee_csdl_downloader.pdf import unzip_and_merge
@@ -16,20 +22,19 @@ from ieee_csdl_downloader.publications import Publication
 
 def download_file(
     download_url: str,
-    download_path: Optional[Path] = None,
-    cookies: Optional[dict] = None,
+    download_path: Path | None = None,
+    cookies: dict | None = None,
 ) -> None:  # pragma: nocover
     if not download_path:
         download_path = Path(get_download_dir() / download_url.split('/')[-1].split('?')[0])
 
-    with requests.get(download_url, stream=True, cookies=cookies) as r:
-        with open(download_path, 'wb') as f:
-            # See the below links:
-            #   - https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests#comment95588469_39217788
-            #   - https://github.com/psf/requests/issues/2155#issuecomment-50771010
-            r.raw.read = functools.partial(r.raw.read, decode_content=True)  # type: ignore[method-assign]
+    with requests.get(download_url, stream=True, cookies=cookies) as r, open(download_path, 'wb') as f:
+        # See the below links:
+        #   - https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests#comment95588469_39217788
+        #   - https://github.com/psf/requests/issues/2155#issuecomment-50771010
+        r.raw.read = functools.partial(r.raw.read, decode_content=True)  # type: ignore[method-assign]
 
-            shutil.copyfileobj(r.raw, f)
+        shutil.copyfileobj(r.raw, f)
 
 
 def get_publication_directory(pub_name: str):
@@ -76,7 +81,7 @@ def get_publication_graphql(year: int, issue: int, publication: Publication) -> 
 def download_publications_from_ieee_csdl() -> None:  # pragma: nocover
     get_download_dir().mkdir(parents=True, exist_ok=True)
 
-    download_problems: List[str] = []
+    download_problems: list[str] = []
 
     for pub in Publication.from_config():
 
@@ -99,14 +104,15 @@ def download_publications_from_ieee_csdl() -> None:  # pragma: nocover
                     continue
                 month = str(pub_month).zfill(2)
 
-                file_fn = lambda file_type, postfix='': get_local_filename(  # noqa: E731
+                # `functools.partial` binds the loop variables eagerly, so the returned
+                # callable only needs the file type (and optional postfix).
+                file_fn = functools.partial(
+                    get_local_filename,
                     year=year,
                     month=month,
                     pub_name=pub.name,
                     vol=str(year - (pub.start_year - 1)).zfill(2),
                     issue=issue,
-                    filetype=file_type,
-                    postfix=postfix,
                 )
 
                 # Download each of the desired files.
@@ -114,7 +120,7 @@ def download_publications_from_ieee_csdl() -> None:  # pragma: nocover
                     print(f'[{datetime.now().isoformat()}] Downloading [{pub.name}] issue ' f'for {year}-{month} (Issue {issue} - {filetype:4})...', end='')
                     url = build_download_url(pub, year, issue, filetype)
 
-                    local_file = file_fn(file_type=filetype)
+                    local_file = file_fn(filetype=filetype)
 
                     # Minus 1 from month because sometimes issues are published a bit early.
                     if year >= TODAY.year and int(month) - 1 > TODAY.month:
@@ -138,21 +144,21 @@ def download_publications_from_ieee_csdl() -> None:  # pragma: nocover
                         print('Status Code != 200; skipping!\n')
                         print('[ERROR] Please try updating the value of `CSDL_AUTH_COOKIE` and re-running the program.')
                         print('Exiting.')
-                        exit(1)
+                        sys.exit(1)
 
                     redirected_url = r.url
                     download_file(download_url=redirected_url, download_path=local_file)
                     print('Success!')
 
                 # If the zip file exists, but not the PDF; create zip
-                pdf = file_fn(file_type='pdf')
-                zip = file_fn(file_type='zip')
+                pdf = file_fn(filetype='pdf')
+                zip = file_fn(filetype='zip')
                 if zip.exists() and not pdf.exists():
                     timestamp = datetime.now().isoformat()
                     print(f'[{timestamp}] No PDF downloaded for {year}-{month} (Issue {issue})...')
                     print(f'[{timestamp}]  \\------ extracting zip and creating...', end='')
 
-                    merged_pdf_name = file_fn(file_type='pdf', postfix=' - MERGED_FROM_ZIP')
+                    merged_pdf_name = file_fn(filetype='pdf', postfix=' - MERGED_FROM_ZIP')
                     if merged_pdf_name.exists():
                         print('Merged PDF exists; skipping!')
                         continue
@@ -182,7 +188,7 @@ def download_ieee_spectrum():  # pragma: nocover
         print('Status Code != 200; skipping downloading IEEE Spectrum!\n')
         print('[ERROR] Please try updating the value of `IEEE_SPECTRUM_SESSIONID` and re-running the program.')
         print('Exiting.')
-        exit(1)
+        sys.exit(1)
 
     pages = r.json().get('parent_site', {}).get('pages', [])
     filtered_pages = filter(
@@ -193,7 +199,7 @@ def download_ieee_spectrum():  # pragma: nocover
         ),
         pages,
     )
-    sorted_filtered_pages = list((sorted(filtered_pages, key=lambda d: datetime.strptime(d['title'], '%B %Y'))))
+    sorted_filtered_pages = sorted(filtered_pages, key=lambda d: datetime.strptime(d['title'], '%B %Y'))
     for page in sorted_filtered_pages:
         about_html = page.get('about_html')
         download_url = about_html if about_html.startswith('https://') else f'https://spectrum.ieee.org{about_html}'

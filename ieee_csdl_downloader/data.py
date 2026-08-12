@@ -1,9 +1,8 @@
 from datetime import datetime
-from typing import Optional, Set
 
 
-def get_pub_formats(json_data: dict) -> Set[str]:
-    formats: Set[str] = set()
+def get_pub_formats(json_data: dict) -> set[str]:
+    formats: set[str] = set()
     data = json_data.get('data', None)
     if not data:
         return formats
@@ -25,19 +24,18 @@ def get_pub_formats(json_data: dict) -> Set[str]:
 
 
 def _extract_month_number(pub_month: str) -> int:
-    if pub_month.endswith('.'):
-        pub_month = pub_month[:-1]
+    pub_month = pub_month.removesuffix('.')
     if len(pub_month) > 3:
         pub_month = pub_month[:3]
     mm = None
     try:
         mm = datetime.strptime(pub_month, '%B')
-    except Exception:
+    except ValueError:
         mm = datetime.strptime(pub_month, '%b')
     return mm.month
 
 
-def get_pub_month(json_data: dict) -> Optional[int]:
+def get_pub_month(json_data: dict) -> int | None:
     data = json_data.get('data', None)
     if not data:
         return None

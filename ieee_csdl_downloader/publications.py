@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
 
 from ieee_csdl_downloader.config import get_publications
 
@@ -10,12 +9,12 @@ class Publication:
     type: str
     url_indicator: str
     start_year: int
-    end_year: Optional[int]
-    issues: List[int] = field(default_factory=list)
+    end_year: int | None
+    issues: list[int] = field(default_factory=list)
 
     @classmethod
-    def from_config(cls) -> List['Publication']:
-        result: List[Publication] = []
+    def from_config(cls) -> list['Publication']:
+        result: list[Publication] = []
         for publication in get_publications():
             result.append(
                 Publication(

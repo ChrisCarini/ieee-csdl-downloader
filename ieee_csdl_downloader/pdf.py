@@ -4,7 +4,6 @@ import tempfile
 import zipfile
 
 from pathlib import Path
-from typing import List
 
 import pikepdf
 
@@ -12,39 +11,43 @@ from ieee_csdl_downloader.config import get_download_dir
 
 
 def unzip_and_merge(output_pdf_file: Path, zip_file: Path):  # pragma: nocover
-    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-        # create temp dir
-        with tempfile.TemporaryDirectory(dir=get_download_dir()) as temp_dirpath:
-            # extract files
-            zip_ref.extractall(temp_dirpath)
+    # create temp dir
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref, tempfile.TemporaryDirectory(dir=get_download_dir()) as temp_dirpath:
+        # extract files
+        zip_ref.extractall(temp_dirpath)
 
-            # If just TOC file, rename
-            pdf_filenames = [p.name for p in list(Path(temp_dirpath).glob('*.pdf'))]
-            if 'toc.pdf' in pdf_filenames:
-                prefix = set()
-                for f in pdf_filenames:
-                    prefix.add(f.split('/')[-1][:3])
+        # If just TOC file, rename
+        pdf_filenames = [p.name for p in list(Path(temp_dirpath).glob('*.pdf'))]
+        if 'toc.pdf' in pdf_filenames:
+            prefix = set()
+            for f in pdf_filenames:
+                prefix.add(f.split('/')[-1][:3])
 
-                prefix = prefix - {'toc'}
+            prefix = prefix - {'toc'}
 
-                shutil.move(
-                    src=Path(temp_dirpath) / 'toc.pdf',  # type: ignore
-                    dst=Path(temp_dirpath) / f'{prefix.pop()}toc.pdf',
-                )
+            shutil.move(
+                src=Path(temp_dirpath) / 'toc.pdf',  # type: ignore
+                dst=Path(temp_dirpath) / f'{prefix.pop()}toc.pdf',
+            )
 
-            sorted_files = sorted_nicely([str(x) for x in list(Path(temp_dirpath).glob('*.pdf'))])
+        sorted_files = sorted_nicely([str(x) for x in list(Path(temp_dirpath).glob('*.pdf'))])
 
-            merge_pdf(sorted_files, output_pdf_file)
+        merge_pdf(sorted_files, output_pdf_file)
 
 
-def sorted_nicely(files: List[str]) -> List[str]:
+def sorted_nicely(files: list[str]) -> list[str]:
     """Sort the given iterable in the way that humans expect."""
-    convert = lambda text: int(text) if text.isdigit() else text  # noqa: E731
-    alphanum_key = lambda key: [convert(c) for c in re.split(r'(\d+)', key)]  # noqa: E731
+
+    def convert(text):
+        return int(text) if text.isdigit() else text
+
+    def alphanum_key(key):
+        return [convert(c) for c in re.split(r'(\d+)', key)]
+
     return sorted(files, key=alphanum_key)
 
 
-def merge_pdf(sorted_files: List[str], merged_pdf_name: Path) -> None:  # pragma: nocover
+def merge_pdf(sorted_files: list[str], merged_pdf_name: Path) -> None:  # pragma: nocover
     pdf = pikepdf.Pdf.new()
 
     # loop through all PDFs
