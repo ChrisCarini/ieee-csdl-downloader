@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 import pikepdf
 
@@ -29,7 +28,7 @@ def test_sorted_nicely() -> None:
     ]
 
 
-def merge_pdf(sorted_files: List[str], merged_pdf_name: Path) -> None:
+def merge_pdf(sorted_files: list[str], merged_pdf_name: Path) -> None:
     pdf = pikepdf.Pdf.new()
 
     # loop through all PDFs

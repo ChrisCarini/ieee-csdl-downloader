@@ -1,1 +1,11 @@
 line-length = 120
+
+[lint]
+# The `DTZ` rules require timezone-aware datetimes; this project intentionally
+# works with naive local dates (publication months such as `January 2024` carry
+# no timezone information), so they are not applicable here.
+ignore = ["DTZ"]
+
+[lint.isort]
+# Keep the existing convention of separating `import x` and `from x import y`.
+lines-between-types = 1
