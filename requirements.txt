@@ -1,4 +1,4 @@
-mypy==2.3.0
+mypy==2.3.1
 pikepdf==10.11.0
 pip-chill==1.0.5
 pytest-cov==7.1.0
