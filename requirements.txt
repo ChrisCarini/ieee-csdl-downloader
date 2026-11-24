@@ -2,7 +2,7 @@ mypy==2.4.1
 pikepdf==10.18.2
 pip-chill==1.0.5
 pytest-cov==7.1.0
-pyyaml==6.0.3
+pyyaml==6.0.4
 requests==2.34.2
 ruff==0.17.6
 types-pyyaml==6.0.12.20261113
